@@ -7,10 +7,6 @@ data:
     - SYMBOL
     - BAR_TIMESTAMP
     - CLOSE_PRICE
-    - VOLUME
-    - NOTIONAL_VOLUME
-    - BUY_VOLUME
-    - SELL_VOLUME
 
 universe:
   top_n: 50

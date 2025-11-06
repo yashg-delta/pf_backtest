@@ -12,8 +12,7 @@ class DataLoader:
 
     # Default columns to load if not specified
     DEFAULT_COLUMNS = [
-        'SYMBOL', 'BAR_TIMESTAMP', 'CLOSE_PRICE', 'VOLUME',
-        'NOTIONAL_VOLUME', 'BUY_VOLUME', 'SELL_VOLUME'
+        'SYMBOL', 'BAR_TIMESTAMP', 'CLOSE_PRICE'
     ]
 
     def __init__(self, data_path: str):
