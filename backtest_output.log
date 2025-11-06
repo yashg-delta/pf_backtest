@@ -1,0 +1,5 @@
+2025-11-06 12:29:52,150 - framework.data.loader - INFO - Registered trades table from tardis_trades_5min.parquet
+2025-11-06 12:29:52,152 - framework.data.loader - INFO - Registered liquidations table from tardis_liquidations_5min.parquet
+2025-11-06 12:29:52,156 - framework.data.loader - INFO - Registered derivative table from tardis_derivative_ticker_5min.parquet
+2025-11-06 12:29:52,157 - framework.engine.backtest - INFO - Starting backtest from 2022-01-01 00:00:00 to 2025-09-30 00:00:00
+2025-11-06 12:29:52,157 - framework.engine.backtest - INFO - Loading data...

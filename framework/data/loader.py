@@ -10,6 +10,12 @@ logger = logging.getLogger(__name__)
 class DataLoader:
     """Efficient data loading using DuckDB and Polars"""
 
+    # Default columns to load if not specified
+    DEFAULT_COLUMNS = [
+        'SYMBOL', 'BAR_TIMESTAMP', 'CLOSE_PRICE', 'VOLUME',
+        'NOTIONAL_VOLUME', 'BUY_VOLUME', 'SELL_VOLUME'
+    ]
+
     def __init__(self, data_path: str):
         self.data_path = Path(data_path)
         self.conn = duckdb.connect(':memory:')
@@ -32,16 +38,32 @@ class DataLoader:
                 """)
                 logger.info(f"Registered {name} table from {file}")
 
+    def _build_column_list(self, columns: Optional[List[str]]) -> str:
+        """Build SQL column list from list of column names"""
+        if columns is None:
+            columns = self.DEFAULT_COLUMNS
+        return ', '.join(columns)
+
     def load_trades_data(
         self,
         start_date: datetime,
         end_date: datetime,
-        symbols: Optional[List[str]] = None
+        symbols: Optional[List[str]] = None,
+        columns: Optional[List[str]] = None
     ) -> pl.DataFrame:
-        """Load trades data for specified period and symbols"""
+        """Load trades data for specified period and symbols
+
+        Args:
+            start_date: Start date for data
+            end_date: End date for data
+            symbols: Optional list of symbols to load
+            columns: Optional list of columns to load (defaults to DEFAULT_COLUMNS)
+        """
+
+        column_list = self._build_column_list(columns)
 
         query = f"""
-        SELECT * FROM trades
+        SELECT {column_list} FROM trades
         WHERE BAR_TIMESTAMP >= '{start_date}'
         AND BAR_TIMESTAMP <= '{end_date}'
         """
@@ -84,36 +106,51 @@ class DataLoader:
         self,
         start_date: datetime,
         end_date: datetime,
-        symbols: Optional[List[str]] = None
+        symbols: Optional[List[str]] = None,
+        columns: Optional[List[str]] = None,
+        load_liquidations: bool = False,
+        load_ratios: bool = False
     ) -> Dict[str, pl.DataFrame]:
-        """Load all available datasets"""
+        """Load all available datasets
+
+        Args:
+            start_date: Start date for data
+            end_date: End date for data
+            symbols: Optional list of symbols to load
+            columns: Optional list of columns to load (defaults to DEFAULT_COLUMNS)
+            load_liquidations: Whether to load liquidations data (default: False)
+            load_ratios: Whether to load ratios data (default: False)
+        """
 
         result = {}
 
-        # Load trades
-        result['trades'] = self.load_trades_data(start_date, end_date, symbols)
+        # Load trades (always loaded)
+        result['trades'] = self.load_trades_data(start_date, end_date, symbols, columns)
 
-        # Load liquidations
-        try:
-            query = f"""
-            SELECT * FROM liquidations
-            WHERE BAR_TIMESTAMP >= '{start_date}'
-            AND BAR_TIMESTAMP <= '{end_date}'
-            """
-            if symbols:
-                symbols_str = ','.join([f"'{s}'" for s in symbols])
-                query += f" AND SYMBOL IN ({symbols_str})"
+        # Load liquidations (only if requested)
+        if load_liquidations:
+            try:
+                column_list = self._build_column_list(columns)
+                query = f"""
+                SELECT {column_list} FROM liquidations
+                WHERE BAR_TIMESTAMP >= '{start_date}'
+                AND BAR_TIMESTAMP <= '{end_date}'
+                """
+                if symbols:
+                    symbols_str = ','.join([f"'{s}'" for s in symbols])
+                    query += f" AND SYMBOL IN ({symbols_str})"
 
-            arrow_table = self.conn.execute(query).fetch_arrow_table()
-            result['liquidations'] = pl.from_arrow(arrow_table)
-        except:
-            logger.warning("Could not load liquidations data")
+                arrow_table = self.conn.execute(query).fetch_arrow_table()
+                result['liquidations'] = pl.from_arrow(arrow_table)
+            except Exception as e:
+                logger.warning(f"Could not load liquidations data: {e}")
 
-        # Load ratios
-        try:
-            result['ratios'] = self.load_ratios_data(start_date, end_date, symbols)
-        except:
-            logger.warning("Could not load ratios data")
+        # Load ratios (only if requested)
+        if load_ratios:
+            try:
+                result['ratios'] = self.load_ratios_data(start_date, end_date, symbols)
+            except Exception as e:
+                logger.warning(f"Could not load ratios data: {e}")
 
         return result
 

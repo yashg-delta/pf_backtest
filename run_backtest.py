@@ -53,7 +53,8 @@ def run_single_backtest(config_path: str):
         data_loader=data_loader,
         universe_selector=universe_selector,
         strategy=strategy,
-        config=backtest_config
+        config=backtest_config,
+        strategy_config=config
     )
 
     results = engine.run()

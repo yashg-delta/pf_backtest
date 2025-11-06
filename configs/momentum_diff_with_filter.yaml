@@ -1,6 +1,17 @@
 # Momentum difference with BTC filter
 name: "momentum_diff_btc_filter"
 
+# Data loading configuration
+data:
+  required_columns:
+    - SYMBOL
+    - BAR_TIMESTAMP
+    - CLOSE_PRICE
+    - VOLUME
+    - NOTIONAL_VOLUME
+    - BUY_VOLUME
+    - SELL_VOLUME
+
 universe:
   top_n: 50
   volume_lookback_days: 14

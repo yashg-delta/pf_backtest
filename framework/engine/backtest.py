@@ -40,12 +40,14 @@ class BacktestEngine:
         data_loader: DataLoader,
         universe_selector: UniverseSelector,
         strategy: BaseStrategy,
-        config: BacktestConfig
+        config: BacktestConfig,
+        strategy_config: Optional[Dict[str, Any]] = None
     ):
         self.data_loader = data_loader
         self.universe_selector = universe_selector
         self.strategy = strategy
         self.config = config
+        self.strategy_config = strategy_config or {}
 
         self.portfolio = PortfolioTracker(config.initial_capital)
         self.execution = ExecutionEngine(config.transaction_cost_bps)
@@ -95,9 +97,22 @@ class BacktestEngine:
         """Load and validate all required data"""
         logger.info("Loading data...")
 
+        # Extract columns from strategy config if available
+        columns = self.strategy_config.get('data', {}).get('required_columns', None)
+
+        # Extract optional data loading flags
+        load_liquidations = self.strategy_config.get('data', {}).get('load_liquidations', False)
+        load_ratios = self.strategy_config.get('data', {}).get('load_ratios', False)
+
+        if columns:
+            logger.info(f"Loading selective columns: {columns}")
+
         data = self.data_loader.load_all_data(
             self.config.start_date,
-            self.config.end_date
+            self.config.end_date,
+            columns=columns,
+            load_liquidations=load_liquidations,
+            load_ratios=load_ratios
         )
 
         # Validate and clean trades data

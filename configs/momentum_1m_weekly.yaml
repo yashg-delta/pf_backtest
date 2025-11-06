@@ -1,6 +1,17 @@
 # Simple momentum - 1 month lookback, weekly rebalance
 name: "momentum_1m_weekly"
 
+# Data loading configuration
+data:
+  required_columns:
+    - SYMBOL
+    - BAR_TIMESTAMP
+    - CLOSE_PRICE
+    - VOLUME
+    - NOTIONAL_VOLUME
+    - BUY_VOLUME
+    - SELL_VOLUME
+
 universe:
   top_n: 50
   volume_lookback_days: 14

@@ -1,6 +1,17 @@
 # 1-month momentum, weekly rebalance, BTC > 200 MA
 name: "momentum_1m_weekly_btc200"
 
+# Data loading configuration
+data:
+  required_columns:
+    - SYMBOL
+    - BAR_TIMESTAMP
+    - CLOSE_PRICE
+    - VOLUME
+    - NOTIONAL_VOLUME
+    - BUY_VOLUME
+    - SELL_VOLUME
+
 # Universe selection
 universe:
   top_n: 50
