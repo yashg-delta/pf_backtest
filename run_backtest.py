@@ -135,9 +135,30 @@ def run_parameter_sweep():
               f"{metrics.get('max_drawdown', 0):<10.2f}% "
               f"{metrics.get('total_return', 0):<10.2f}%")
 
-if __name__ == "__main__":
-    # Run single backtest
-    run_single_backtest('configs/momentum_1w_daily.yaml')
+# Add this function to run_backtest.py
+def run_momentum_strategies():
+    """Run the two momentum strategies"""
+    
+    configs = [
+        'configs/momentum_1m_weekly_btc200.yaml',
+        'configs/momentum_1w_daily_btc20.yaml'
+    ]
+    
+    for config_path in configs:
+        try:
+            run_single_backtest(config_path)
+        except Exception as e:
+            print(f"Error running {config_path}: {e}")
+            import traceback
+            traceback.print_exc()
 
-    # Or run parameter sweep
-    # run_parameter_sweep()
+# Update the main block
+if __name__ == "__main__":
+    run_momentum_strategies()
+
+# if __name__ == "__main__":
+#     # Run single backtest
+#     run_single_backtest('configs/momentum_1w_daily.yaml')
+
+#     # Or run parameter sweep
+#     # run_parameter_sweep()
