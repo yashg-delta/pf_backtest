@@ -1,0 +1,29 @@
+# Momentum difference with BTC filter
+name: "momentum_diff_btc_filter"
+
+universe:
+  top_n: 50
+  volume_lookback_days: 14
+  min_data_coverage: 0.95
+
+factor:
+  name: "momentum_difference"
+  params:
+    long_period: 30
+    short_period: 7
+
+selection:
+  type: "top"
+  top_n: 10
+
+rebalance:
+  frequency: "weekly"
+  day: "monday"
+  time: "00:00"
+
+filters:
+  - type: "btc_ma"
+    ma_period: 200
+
+execution:
+  transaction_cost_bps: 3

@@ -1,0 +1,34 @@
+# Simple momentum - 1 week lookback, daily rebalance
+name: "momentum_1w_daily"
+
+# Universe selection
+universe:
+  top_n: 50
+  volume_lookback_days: 14
+  min_data_coverage: 0.95
+
+# Factor configuration
+factor:
+  name: "momentum"
+  params:
+    lookback_days: 7
+    price_col: "CLOSE_PRICE"
+
+# Selection criteria
+selection:
+  type: "top"  # or "bottom" for reversal
+  top_n: 10
+
+# Rebalancing
+rebalance:
+  frequency: "daily"
+  time: "00:00"
+
+# Filters (optional)
+filters: []
+  # - type: "btc_ma"
+  #   ma_period: 200
+
+# Execution
+execution:
+  transaction_cost_bps: 3

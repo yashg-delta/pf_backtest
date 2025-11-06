@@ -1,0 +1,27 @@
+# Simple momentum - 1 month lookback, weekly rebalance
+name: "momentum_1m_weekly"
+
+universe:
+  top_n: 50
+  volume_lookback_days: 14
+  min_data_coverage: 0.95
+
+factor:
+  name: "momentum"
+  params:
+    lookback_days: 30
+    price_col: "CLOSE_PRICE"
+
+selection:
+  type: "top"
+  top_n: 10
+
+rebalance:
+  frequency: "weekly"
+  day: "monday"
+  time: "00:00"
+
+filters: []
+
+execution:
+  transaction_cost_bps: 3
