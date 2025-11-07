@@ -19,7 +19,6 @@ class RegimeFilter:
         """Filter signals based on BTC moving average"""
 
         # Calculate MA lookback
-        ma_bars = ma_period * 288  # 288 5-min bars per day
         lookback_start = timestamp - timedelta(days=ma_period + 1)
 
         # Get BTC data
@@ -81,8 +80,8 @@ class RegimeFilter:
             pl.col('CLOSE_PRICE').pct_change().alias('returns')
         )
 
-        # Annualized volatility
-        volatility = returns['returns'].std() * (252 * 288) ** 0.5
+        # Annualized volatility (daily data: 365 days per year for crypto markets)
+        volatility = returns['returns'].std() * (365 ** 0.5)
 
         if volatility < vol_threshold:
             return signals

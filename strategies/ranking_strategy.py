@@ -87,24 +87,44 @@ class RankingStrategy(BaseStrategy):
         factor_data = self.factor_func(factor_data, **self.factor_params)
 
         # Get latest factor values
+        # Use date-based filtering to handle normalized timestamps
+        current_date = timestamp.date()
+        factor_col = self._get_factor_column()
         latest_factors = (
             factor_data
-            .filter(pl.col('BAR_TIMESTAMP') == timestamp)
-            .select(['SYMBOL', self._get_factor_column()])
+            .filter(pl.col('BAR_TIMESTAMP').dt.date() == current_date)
+            .sort(['SYMBOL', 'BAR_TIMESTAMP'])
+            .group_by('SYMBOL')
+            .agg(pl.last(factor_col).alias(factor_col))
         )
 
         if latest_factors.is_empty():
             return pl.DataFrame()
 
-        # Rank factors
-        latest_factors = latest_factors.with_columns(
-            pl.col(self._get_factor_column())
+        # Filter to only symbols with VALID (non-null) factor values
+        factor_col = self._get_factor_column()
+        valid_factors = latest_factors.filter(
+            pl.col(factor_col).is_not_null()
+        )
+
+        # Check if we have at least top_n valid factors
+        if len(valid_factors) < self.top_n:
+            logger.warning(
+                f"Insufficient valid factors at {timestamp}: "
+                f"{len(valid_factors)} valid symbols < {self.top_n} required. "
+                f"Skipping rebalance."
+            )
+            return pl.DataFrame()
+
+        # Rank factors (only valid ones)
+        valid_factors = valid_factors.with_columns(
+            pl.col(factor_col)
             .rank(method='dense', descending=(self.selection_type == 'top'))
             .alias('rank')
         )
 
         # Select top/bottom N
-        signals = latest_factors.filter(
+        signals = valid_factors.filter(
             pl.col('rank') <= self.top_n
         )
 
@@ -114,7 +134,7 @@ class RankingStrategy(BaseStrategy):
             pl.lit('long').alias('direction')
         )
 
-        logger.info(f"Generated {len(signals)} signals at {timestamp}")
+        logger.info(f"Generated {len(signals)} signals at {timestamp} (from {len(valid_factors)} valid)")
         return signals
 
     def _get_factor_column(self) -> str:

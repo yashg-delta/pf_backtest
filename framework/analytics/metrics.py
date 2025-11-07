@@ -54,7 +54,7 @@ class MetricsCalculator:
 
         total_return = (1 + daily_returns[-1] / 100) - 1
         n_days = len(daily_returns)
-        years = n_days / 252
+        years = n_days / 365  # Crypto markets: 365 days per year
 
         if years > 0:
             annualized = (1 + total_return) ** (1 / years) - 1
@@ -68,7 +68,7 @@ class MetricsCalculator:
             return 0
 
         daily_pnl_diff = np.diff(daily_returns)
-        return np.std(daily_pnl_diff) * np.sqrt(252)
+        return np.std(daily_pnl_diff) * np.sqrt(365)  # Crypto markets: 365 days per year
 
     @staticmethod
     def _sharpe_ratio(daily_returns: np.ndarray, risk_free_rate: float = 0) -> float:
@@ -77,10 +77,10 @@ class MetricsCalculator:
             return 0
 
         daily_pnl_diff = np.diff(daily_returns)
-        excess_returns = daily_pnl_diff - risk_free_rate / 252
+        excess_returns = daily_pnl_diff - risk_free_rate / 365  # Crypto markets: 365 days per year
 
         if np.std(daily_pnl_diff) > 0:
-            return np.mean(excess_returns) / np.std(daily_pnl_diff) * np.sqrt(252)
+            return np.mean(excess_returns) / np.std(daily_pnl_diff) * np.sqrt(365)  # Crypto markets: 365 days per year
         return 0
 
     @staticmethod
@@ -90,13 +90,13 @@ class MetricsCalculator:
             return 0
 
         daily_pnl_diff = np.diff(daily_returns)
-        excess_returns = daily_pnl_diff - risk_free_rate / 252
+        excess_returns = daily_pnl_diff - risk_free_rate / 365  # Crypto markets: 365 days per year
         downside_returns = daily_pnl_diff[daily_pnl_diff < 0]
 
         if len(downside_returns) > 0:
             downside_std = np.std(downside_returns)
             if downside_std > 0:
-                return np.mean(excess_returns) / downside_std * np.sqrt(252)
+                return np.mean(excess_returns) / downside_std * np.sqrt(365)  # Crypto markets: 365 days per year
         return 0
 
     @staticmethod
@@ -138,8 +138,8 @@ class MetricsCalculator:
     def _trade_statistics(trades_df: pl.DataFrame) -> Dict[str, float]:
         """Calculate trade-level statistics"""
 
-        # Filter to closed trades only
-        exits = trades_df.filter(pl.col('side') == 'sell')
+        # All trades in trades_df are closed trades (matched entry-exit pairs)
+        exits = trades_df.filter(pl.col('exit_time').is_not_null())
 
         if exits.is_empty():
             return {

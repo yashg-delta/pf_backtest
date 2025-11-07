@@ -57,6 +57,9 @@ class ExecutionEngine:
     ) -> List[Dict[str, Any]]:
         """Execute orders and return trades"""
 
+        # Debug: log the portfolio value being used for sizing
+        logger.info(f"[EXEC] Executing {len(orders)} orders with portfolio_value=${portfolio_value:,.2f}")
+
         trades = []
 
         for order in orders:

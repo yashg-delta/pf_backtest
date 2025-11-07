@@ -64,7 +64,7 @@ class TradeAnalyzer:
 
     @staticmethod
     def aggregate_to_daily(portfolio_ts: pl.DataFrame) -> pl.DataFrame:
-        """Aggregate 5-minute data to daily"""
+        """Group portfolio snapshots by date (data already at daily frequency)"""
 
         if portfolio_ts.is_empty():
             return pl.DataFrame()

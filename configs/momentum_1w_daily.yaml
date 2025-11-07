@@ -12,6 +12,11 @@ data:
 
 # Universe selection
 universe:
+  # Pre-calculated universe settings
+  use_precalculated: true
+  file_path: "data/universe/universe_top50_14d_daily.parquet"
+
+  # Original parameters (kept for reference/fallback)
   top_n: 50
   volume_lookback_days: 14
   min_data_coverage: 0.95

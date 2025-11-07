@@ -13,8 +13,8 @@ class FactorCalculator:
         price_col: str = 'CLOSE_PRICE'
     ) -> pl.DataFrame:
         """Calculate momentum factor"""
-        
-        bars_lookback = lookback_days * 288  # 288 5-min bars per day
+
+        bars_lookback = lookback_days  # Daily bars (1 bar per day)
         
         return data.with_columns([
             ((pl.col(price_col) / pl.col(price_col).shift(bars_lookback)) - 1)
@@ -28,8 +28,8 @@ class FactorCalculator:
         lookback_days: int
     ) -> pl.DataFrame:
         """Calculate buy/sell volume ratio"""
-        
-        bars_lookback = lookback_days * 288
+
+        bars_lookback = lookback_days
         
         return data.with_columns([
             (pl.col('BUY_VOLUME').rolling_sum(bars_lookback) / 
@@ -65,8 +65,8 @@ class FactorCalculator:
         lookback_days: int
     ) -> pl.DataFrame:
         """Calculate rolling z-score"""
-        
-        bars_lookback = lookback_days * 288
+
+        bars_lookback = lookback_days
         
         return data.with_columns([
             ((pl.col(column) - pl.col(column).rolling_mean(bars_lookback)) /

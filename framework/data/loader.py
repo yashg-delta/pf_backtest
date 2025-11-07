@@ -22,10 +22,12 @@ class DataLoader:
 
     def _register_tables(self):
         """Register parquet files as DuckDB views"""
+        # Note: Framework operates on DAILY data (1 bar per trading day)
+        # The trades table contains daily OHLCV bars aggregated from 5-minute source data
         tables = {
-            'trades': 'tardis_trades_5min.parquet',
-            'liquidations': 'tardis_liquidations_5min.parquet',
-            'derivative': 'tardis_derivative_ticker_5min.parquet'
+            'trades': 'tardis_trades_daily.parquet',  # Daily bars (1 per day)
+            'liquidations': 'tardis_liquidations_5min.parquet',  # Optional 5-min liquidation data
+            'derivative': 'tardis_derivative_ticker_5min.parquet'  # Optional 5-min derivative metrics
         }
 
         for name, file in tables.items():

@@ -108,7 +108,7 @@ class Visualizer:
         # Calculate rolling correlation
         merged = merged.with_columns(
             pl.corr('portfolio_return', 'btc_return')
-            .rolling_window(window * 288)  # 288 5-min bars per day
+            .rolling_window(window)  # Daily data: 1 bar per day
             .alias('correlation')
         )
 
